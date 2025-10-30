@@ -1,0 +1,83 @@
+version: '3.8'
+
+volumes:
+  nginx_logs:
+
+networks:
+  app_network:
+    driver: bridge
+
+services:
+  # ------------------------
+  # NGINX Reverse Proxy
+  # ------------------------
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "8080:80"
+    environment:
+      - PORT=${PORT}
+      - ACTIVE_POOL=${ACTIVE_POOL}
+      - RELEASE_ID=${RELEASE_ID}
+    volumes:
+      - nginx_logs:/var/log/nginx
+      - ./nginx.conf.template:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - blue_app
+      - green_app
+    networks:
+      - app_network
+
+  # ------------------------
+  # BLUE INSTANCE
+  # ------------------------
+  blue_app:
+    image: ${BLUE_IMAGE}
+    container_name: blue_app
+    ports:
+      - "8081:${PORT}"
+    environment:
+      - PORT=${PORT}
+      - APP_POOL=blue
+      - RELEASE_ID=${RELEASE_ID_BLUE}
+    networks:
+      - app_network
+
+  # ------------------------
+  # GREEN INSTANCE
+  # ------------------------
+  green_app:
+    image: ${GREEN_IMAGE}
+    container_name: green_app
+    ports:
+      - "8082:${PORT}"
+    environment:
+      - PORT=${PORT}
+      - APP_POOL=green
+      - RELEASE_ID=${RELEASE_ID_GREEN}
+    networks:
+      - app_network
+
+  # ------------------------
+  # ALERT WATCHER SERVICE
+  # ------------------------
+  alert_watcher:
+    build: ./alert_watcher
+    image: hng-stage3-alert-watcher:latest
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - ERROR_RATE_THRESHOLD=${ERROR_RATE_THRESHOLD}
+      - WINDOW_SIZE=${WINDOW_SIZE}
+      - ALERT_COOLDOWN_SEC=${ALERT_COOLDOWN_SEC}
+      - MAINTENANCE_MODE=${MAINTENANCE_MODE}
+      - LOG_PATH=${LOG_PATH}
+    volumes:
+      - nginx_logs:/var/log/nginx:ro
+      - ./alert_watcher:/app:ro
+    depends_on:
+      - nginx
+    networks:
+      - app_network
+

@@ -1,0 +1,49 @@
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format stage3 '$remote_addr - $remote_user [$time_local] '
+                      '"$request" $status $body_bytes_sent '
+                      '"$http_referer" "$http_user_agent" '
+                      'pool="$http_x_app_pool" '
+                      'release="$http_x_release_id" '
+                      'upstream_status="$upstream_status" '
+                      'upstream_addr="$upstream_addr" '
+                      'request_time="$request_time" '
+                      'upstream_response_time="$upstream_response_time"';
+
+    access_log /var/log/nginx/access.log stage3;
+
+    upstream backend {
+        server blue_app:${PORT} max_fails=1 fail_timeout=3s;
+        server green_app:${PORT} backup;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://backend;
+
+            proxy_connect_timeout 3s;
+            proxy_send_timeout 3s;
+            proxy_read_timeout 3s;
+
+            proxy_next_upstream error timeout http_500 http_502 http_503 http_504;
+            proxy_next_upstream_tries 2;
+
+            proxy_pass_request_headers on;
+
+            # Pass key headers (so they appear in logs)
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # These will be used for observability
+            proxy_set_header X-App-Pool $ACTIVE_POOL;
+            proxy_set_header X-Release-Id $RELEASE_ID;
+        }
+    }
+}
