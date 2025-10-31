@@ -22,8 +22,8 @@ services:
       - ACTIVE_POOL=${ACTIVE_POOL}
       - RELEASE_ID=${RELEASE_ID}
     volumes:
-      - nginx_logs:/var/log/nginx
-      - ./nginx.conf.template:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./entrypoint.sh:/docker-entrypoint.d/40-generate-config.sh:ro
     depends_on:
       - blue_app
       - green_app

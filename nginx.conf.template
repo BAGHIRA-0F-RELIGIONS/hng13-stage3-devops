@@ -22,6 +22,7 @@ http {
 
     server {
         listen 80;
+        server_name _;
 
         location / {
             proxy_pass http://backend;
