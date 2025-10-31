@@ -1,12 +1,5 @@
 version: '3.8'
 
-volumes:
-  nginx_logs:
-
-networks:
-  app_network:
-    driver: bridge
-
 services:
   # ------------------------
   # NGINX Reverse Proxy
@@ -15,6 +8,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
+    container_name: nginx
     ports:
       - "8080:80"
     environment:
@@ -23,6 +17,7 @@ services:
       - RELEASE_ID=${RELEASE_ID}
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./nginx_logs:/var/log/nginx
       - ./entrypoint.sh:/docker-entrypoint.d/40-generate-config.sh:ro
     depends_on:
       - blue_app
@@ -74,10 +69,14 @@ services:
       - MAINTENANCE_MODE=${MAINTENANCE_MODE}
       - LOG_PATH=${LOG_PATH}
     volumes:
-      - nginx_logs:/var/log/nginx:ro
+      - ./nginx_logs:/var/log/nginx:ro
       - ./alert_watcher:/app:ro
     depends_on:
       - nginx
     networks:
       - app_network
+
+networks:
+  app_network:
+    driver: bridge
 

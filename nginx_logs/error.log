@@ -1,0 +1,7 @@
+2025/10/31 10:36:29 [emerg] 8#8: unknown "release_id" variable
+2025/10/31 10:47:06 [emerg] 8#8: unknown "release_id" variable
+2025/10/31 11:03:11 [emerg] 8#8: invalid number of arguments in "proxy_set_header" directive in /etc/nginx/nginx.conf:35
+2025/10/31 11:10:04 [emerg] 8#8: invalid number of arguments in "proxy_set_header" directive in /etc/nginx/nginx.conf:35
+2025/10/31 12:38:25 [error] 8#8: *9 upstream timed out (110: Connection timed out) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET /nonexistent HTTP/1.1", upstream: "http://172.18.0.3:8080/nonexistent", host: "localhost:8080"
+2025/10/31 12:38:32 [error] 8#8: *204 upstream timed out (110: Connection timed out) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET /nonexistent HTTP/1.1", upstream: "http://172.18.0.3:8080/nonexistent", host: "localhost:8080"
+2025/10/31 12:38:39 [error] 8#8: *391 upstream timed out (110: Connection timed out) while connecting to upstream, client: 172.18.0.1, server: _, request: "GET /nonexistent HTTP/1.1", upstream: "http://172.18.0.3:8080/nonexistent", host: "localhost:8080"

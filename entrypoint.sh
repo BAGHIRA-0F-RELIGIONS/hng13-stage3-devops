@@ -1,5 +1,8 @@
 #!/bin/sh
+set -e
 
-envsubst '${PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+echo "Rendering Nginx configuration..."
+envsubst '${PORT} ${ACTIVE_POOL} ${RELEASE_ID}' < /etc/nginx/templates/default.conf.template > /etc/nginx/nginx.conf
 
-nginx -g 'daemon off;'
+echo "Starting Nginx..."
+exec nginx -g 'daemon off;'
